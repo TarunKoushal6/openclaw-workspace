@@ -1,0 +1,16 @@
+# Session exports
+*.html
+
+# OpenClaw internal
+.openclaw/
+
+# Accidental dirs
+~/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env/secrets
+.env
+*.key
