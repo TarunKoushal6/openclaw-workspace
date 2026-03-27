@@ -16,6 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# PRE-INSTALL BOT: Download heavy files during build to avoid browser timeout
+RUN bash install_moltbot_deps.sh || echo "Installation script finished"
+
 # Configure supervisor to run uvicorn server
 RUN echo "[program:uvicorn]" > /etc/supervisor/conf.d/uvicorn.conf && \
     echo "command=uvicorn server:app --host 0.0.0.0 --port 10000" >> /etc/supervisor/conf.d/uvicorn.conf && \
