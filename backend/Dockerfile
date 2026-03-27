@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install necessary tools including supervisor and xz-utils
+# Install necessary tools
 RUN apt-get update && apt-get install -y \
     supervisor \
     curl \
@@ -16,5 +16,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Run the correct server file
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "10000"]
+# WAKE UP supervisor first, THEN start the server
+CMD ["bash", "-c", "service supervisor start || supervisord; uvicorn server:app --host 0.0.0.0 --port 10000"]
