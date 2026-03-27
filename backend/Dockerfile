@@ -1,11 +1,12 @@
 FROM python:3.11-slim
 
-# Install necessary tools including supervisor
+# Install necessary tools including supervisor and xz-utils
 RUN apt-get update && apt-get install -y \
     supervisor \
     curl \
     git \
     bash \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
