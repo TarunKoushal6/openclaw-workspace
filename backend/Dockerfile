@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# 1. Install ALL possible background tools and Node.js to prevent missing dependency errors
+# 1. Install necessary tools
 RUN apt-get update && apt-get install -y \
     supervisor \
     curl \
@@ -15,21 +15,21 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# 2. Install Python dependencies
+# 2. Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 3. Copy your entire code
+# 3. Code
 COPY . .
 
-# 4. Create all necessary folders and give MAXIMUM permissions to avoid Access Denied errors
+# 4. Folders
 RUN mkdir -p /var/log/supervisor /var/run/supervisor /etc/supervisor/conf.d ~/.openclaw ~/clawd \
     && chmod -R 777 /var/run /var/log
 
-# 5. PRE-INSTALL Bot to avoid 5-minute browser timeouts
+# 5. Pre-install Bot
 RUN chmod +x install_moltbot_deps.sh && bash install_moltbot_deps.sh || echo "Pre-install done"
 
-# 6. ULTIMATE Supervisor Config (Fixes ALL .sock and reread errors permanently)
+# 6. Master Supervisor config
 RUN echo "[unix_http_server]" > /etc/supervisor/supervisord.conf && \
     echo "file=/var/run/supervisor.sock" >> /etc/supervisor/supervisord.conf && \
     echo "chmod=0777" >> /etc/supervisor/supervisord.conf && \
@@ -49,7 +49,18 @@ RUN echo "[unix_http_server]" > /etc/supervisor/supervisord.conf && \
     echo "[include]" >> /etc/supervisor/supervisord.conf && \
     echo "files = /etc/supervisor/conf.d/*.conf" >> /etc/supervisor/supervisord.conf
 
-# 7. Add your FastAPI backend under Supervisor
+# 7. ADD THE MISSING BOT TO SUPERVISOR (This fixes the "no such process" error)
+RUN echo "[program:openclaw-gateway]" > /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "command=bash /root/run_openclaw.sh" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "autostart=false" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "autorestart=true" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "user=root" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "stdout_logfile=/dev/stdout" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "stdout_logfile_maxbytes=0" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "stderr_logfile=/dev/stderr" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "stderr_logfile_maxbytes=0" >> /etc/supervisor/conf.d/openclaw-gateway.conf
+
+# 8. Add FastAPI backend to Supervisor
 RUN echo "[program:backend]" > /etc/supervisor/conf.d/backend.conf && \
     echo "command=uvicorn server:app --host 0.0.0.0 --port 10000" >> /etc/supervisor/conf.d/backend.conf && \
     echo "autostart=true" >> /etc/supervisor/conf.d/backend.conf && \
@@ -59,5 +70,4 @@ RUN echo "[program:backend]" > /etc/supervisor/conf.d/backend.conf && \
     echo "stderr_logfile=/dev/stderr" >> /etc/supervisor/conf.d/backend.conf && \
     echo "stderr_logfile_maxbytes=0" >> /etc/supervisor/conf.d/backend.conf
 
-# 8. Start everything
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
