@@ -49,9 +49,9 @@ RUN echo "[unix_http_server]" > /etc/supervisor/supervisord.conf && \
     echo "[include]" >> /etc/supervisor/supervisord.conf && \
     echo "files = /etc/supervisor/conf.d/*.conf" >> /etc/supervisor/supervisord.conf
 
-# 7. ADD THE MISSING BOT TO SUPERVISOR (This fixes the "no such process" error)
+# 7. ADD THE MISSING 'gateway' COMMAND HERE
 RUN echo "[program:openclaw-gateway]" > /etc/supervisor/conf.d/openclaw-gateway.conf && \
-    echo "command=bash /root/run_openclaw.sh" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
+    echo "command=bash /root/run_openclaw.sh gateway" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
     echo "autostart=false" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
     echo "autorestart=true" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
     echo "user=root" >> /etc/supervisor/conf.d/openclaw-gateway.conf && \
