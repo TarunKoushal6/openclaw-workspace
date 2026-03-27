@@ -1,14 +1,13 @@
 FROM python:3.11-slim
 
-# Install necessary tools and create supervisor folders
+# Install necessary tools
 RUN apt-get update && apt-get install -y \
     supervisor \
     curl \
     git \
     bash \
     xz-utils \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /var/log/supervisor /var/run
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -17,5 +16,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Run supervisor in background, wait 2 seconds, THEN start server
-CMD ["bash", "-c", "supervisord -c /etc/supervisor/supervisord.conf & sleep 2 && uvicorn server:app --host 0.0.0.0 --port 10000"]
+# Configure supervisor to run uvicorn server
+RUN echo "[program:uvicorn]" > /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "command=uvicorn server:app --host 0.0.0.0 --port 10000" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "autostart=true" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "autorestart=true" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "stderr_logfile=/dev/stderr" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "stderr_logfile_maxbytes=0" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "stdout_logfile=/dev/stdout" >> /etc/supervisor/conf.d/uvicorn.conf && \
+    echo "stdout_logfile_maxbytes=0" >> /etc/supervisor/conf.d/uvicorn.conf
+
+# Start supervisor as the main process
+CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
