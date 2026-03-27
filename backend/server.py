@@ -382,7 +382,7 @@ def get_openclaw_command():
 
 def ensure_moltbot_installed():
     """Ensure Moltbot dependencies are installed"""
-    install_script = "/app/backend/install_moltbot_deps.sh"
+    install_script = "/app/install_moltbot_deps.sh"
 
     # Check if openclaw is available
     openclaw_cmd = get_openclaw_command()
