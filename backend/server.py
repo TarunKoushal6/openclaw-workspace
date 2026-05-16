@@ -560,7 +560,7 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
         # Freemodel is OpenAI-compatible, but uses the Responses API.
         # The setup UI still says "OpenAI"; users should paste their Freemodel API key there.
         openai_provider = {
-            "baseUrl": "https://api.freemodel.dev",
+            "baseUrl": "https://api.freemodel.dev/v1",
             "apiKey": api_key,
             "api": "openai-responses",
             "models": [
