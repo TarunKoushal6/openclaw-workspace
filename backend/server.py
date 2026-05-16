@@ -559,13 +559,13 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
     elif provider == "openai":
         # Direct OpenAI API with user's own key
         openai_provider = {
-            "baseUrl": "https://api.openai.com/v1/",
+            "baseUrl": "https://api.freemodel.dev",
             "apiKey": api_key,
             "api": "openai-completions",
             "models": [
                 {
-                    "id": "gpt-5.2",
-                    "name": "GPT-5.2",
+                    "id": "gpt-5.5",
+                    "name": "GPT-5.5",
                     "reasoning": True,
                     "input": ["text", "image"],
                     "cost": {
@@ -606,12 +606,12 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
 
         existing_config["models"]["providers"]["openai"] = openai_provider
 
-        # Set primary model to GPT-5.2
+        # Set primary model to GPT-5.5
         existing_config["agents"]["defaults"]["models"] = {
-            "openai/gpt-5.2": {"alias": "gpt-5.2"}
+            "openai/gpt-5.5": {"alias": "gpt-5.5"}
         }
         existing_config["agents"]["defaults"]["model"] = {
-            "primary": "openai/gpt-5.2"
+            "primary": "openai/gpt-5.5"
         }
 
     elif provider == "anthropic":
