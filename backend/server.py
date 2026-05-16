@@ -557,7 +557,8 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
         }
 
     elif provider == "openai":
-        # Direct OpenAI API with user's own key
+        # Freemodel is OpenAI-compatible, but uses the Responses API.
+        # The setup UI still says "OpenAI"; users should paste their Freemodel API key there.
         openai_provider = {
             "baseUrl": "https://api.freemodel.dev",
             "apiKey": api_key,
@@ -567,46 +568,20 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
                     "id": "gpt-5.5",
                     "name": "GPT-5.5",
                     "reasoning": True,
-                    "input": ["text", "image"],
+                    "input": ["text"],
                     "cost": {
-                        "input": 0.00000175,
-                        "output": 0.000014,
-                        "cacheRead": 0.000000175,
-                        "cacheWrite": 0.00000175
+                        "input": 0.000001,
+                        "output": 0.000004
                     },
                     "contextWindow": 400000,
                     "maxTokens": 128000
-                },
-                {
-                    "id": "o4-mini-2025-04-16",
-                    "name": "o4-mini",
-                    "reasoning": True,
-                    "input": ["text", "image"],
-                    "cost": {
-                        "input": 0.0000011,
-                        "output": 0.0000044
-                    },
-                    "contextWindow": 200000,
-                    "maxTokens": 100000
-                },
-                {
-                    "id": "gpt-4o",
-                    "name": "GPT-4o",
-                    "reasoning": False,
-                    "input": ["text", "image"],
-                    "cost": {
-                        "input": 0.0000025,
-                        "output": 0.00001
-                    },
-                    "contextWindow": 128000,
-                    "maxTokens": 16384
                 }
             ]
         }
 
         existing_config["models"]["providers"]["openai"] = openai_provider
 
-        # Set primary model to GPT-5.5
+        # Set primary model to GPT-5.5 via Freemodel
         existing_config["agents"]["defaults"]["models"] = {
             "openai/gpt-5.5": {"alias": "gpt-5.5"}
         }
