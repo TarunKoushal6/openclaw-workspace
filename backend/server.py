@@ -498,7 +498,7 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
         emergent_gpt_provider = {
             "baseUrl": f"{emergent_base_url}/",
             "apiKey": emergent_key,
-            "api": "openai-completions",
+            "api": "openai-responses",
             "models": [
                 {
                     "id": "gpt-5.2",
@@ -561,7 +561,7 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
         openai_provider = {
             "baseUrl": "https://api.freemodel.dev",
             "apiKey": api_key,
-            "api": "openai-completions",
+            "api": "openai-responses",
             "models": [
                 {
                     "id": "gpt-5.5",
