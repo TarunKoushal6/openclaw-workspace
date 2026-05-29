@@ -304,7 +304,7 @@ async def create_session(request: SessionRequest, response: Response):
             value=session_token,
             httponly=True,
             secure=True,
-            samesite="none",
+            samesite="lax",
             path="/",
             max_age=SESSION_EXPIRY_DAYS * 24 * 60 * 60
         )
@@ -345,7 +345,7 @@ async def logout(request: Request, response: Response):
         key="session_token",
         path="/",
         secure=True,
-        samesite="none"
+        samesite="lax"
     )
 
     return {"ok": True, "message": "Logged out"}
@@ -1120,13 +1120,46 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS config — when serving frontend same-origin from FastAPI, CORS is mostly a no-op.
+# But if CORS_ORIGINS is set (cross-origin setup), use exact origins with credentials.
+# Wildcard '*' is INCOMPATIBLE with allow_credentials=True per CORS spec — browsers drop cookies.
+_cors_env = os.environ.get('CORS_ORIGINS', '').strip()
+if _cors_env and _cors_env != '*':
+    _allowed_origins = [o.strip() for o in _cors_env.split(',') if o.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_origins=_allowed_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    # No CORS_ORIGINS set → assume same-origin deployment. Allow all without credentials.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=False,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Serve frontend static build (same-origin → cookies work reliably)
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+_FRONTEND_DIR = os.environ.get("FRONTEND_BUILD_DIR", "/app/frontend/build")
+if os.path.isdir(_FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=os.path.join(_FRONTEND_DIR, "static")), name="static")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str):
+        # Let API routes 404 normally
+        if full_path.startswith("api/"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404)
+        candidate = os.path.join(_FRONTEND_DIR, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        return FileResponse(os.path.join(_FRONTEND_DIR, "index.html"))
 
 
 # Background task for auto-fixing WhatsApp
