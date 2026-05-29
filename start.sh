@@ -24,39 +24,39 @@ cat > /root/.openclaw/openclaw.json << CONF
     "mode": "merge",
     "providers": {
       "emergent-gpt": {
-        "baseUrl": "${EMERGENT_BASE_URL:-https://integrations.emergentagent.com/llm}/",
+        "baseUrl": "${EMERGENT_BASE_URL:-https://api.freemodel.dev}/",
         "apiKey": "${LLM_KEY}",
         "api": "openai-completions",
         "models": [
           {
-            "id": "gpt-5.2",
-            "name": "GPT-5.2",
+            "id": "gpt-5.5",
+            "name": "GPT-5.5",
             "reasoning": true,
             "input": ["text"],
             "contextWindow": 400000,
             "maxTokens": 128000
-          }
-        ]
-      },
-      "emergent-claude": {
-        "baseUrl": "${EMERGENT_BASE_URL:-https://integrations.emergentagent.com/llm}",
-        "apiKey": "${LLM_KEY}",
-        "api": "anthropic-messages",
-        "authHeader": true,
-        "models": [
-          {
-            "id": "claude-sonnet-4-6",
-            "name": "Claude Sonnet 4.6",
-            "input": ["text"],
-            "contextWindow": 200000,
-            "maxTokens": 64000
           },
           {
-            "id": "claude-opus-4-6",
-            "name": "Claude Opus 4.6",
+            "id": "gpt-5.4",
+            "name": "GPT-5.4",
+            "reasoning": true,
             "input": ["text"],
-            "contextWindow": 200000,
-            "maxTokens": 64000
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.4-mini",
+            "name": "GPT-5.4 Mini",
+            "input": ["text"],
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.3-codex",
+            "name": "GPT-5.3 Codex",
+            "input": ["text"],
+            "contextWindow": 400000,
+            "maxTokens": 128000
           }
         ]
       }
@@ -66,12 +66,13 @@ cat > /root/.openclaw/openclaw.json << CONF
     "defaults": {
       "workspace": "/root/clawd",
       "model": {
-        "primary": "emergent-claude/claude-opus-4-6"
+        "primary": "emergent-gpt/gpt-5.5"
       },
       "models": {
-        "emergent-gpt/gpt-5.2": {"alias": "gpt-5.2"},
-        "emergent-claude/claude-sonnet-4-6": {"alias": "sonnet"},
-        "emergent-claude/claude-opus-4-6": {"alias": "opus"}
+        "emergent-gpt/gpt-5.5": {"alias": "gpt-5.5"},
+        "emergent-gpt/gpt-5.4": {"alias": "gpt-5.4"},
+        "emergent-gpt/gpt-5.4-mini": {"alias": "mini"},
+        "emergent-gpt/gpt-5.3-codex": {"alias": "codex"}
       }
     }
   },
@@ -108,4 +109,3 @@ fi
 echo "Starting FastAPI backend on port ${PORT:-8001}..."
 cd /app/backend
 exec uvicorn server:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1
-
