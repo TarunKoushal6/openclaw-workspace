@@ -106,5 +106,6 @@ else
 fi
 
 echo "Starting FastAPI backend on port ${PORT:-8001}..."
-cd /app
-exec uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1
+cd /app/backend
+exec uvicorn server:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1
+
