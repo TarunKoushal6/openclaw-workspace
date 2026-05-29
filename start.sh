@@ -1,12 +1,10 @@
 #!/bin/bash
-set -e
+# Note: no `set -e` — gateway is best-effort; backend must always start.
 
-echo "=== Starting OpenClaw Render Deployment ==="
+echo "=== Starting OpenClaw Deployment ==="
 
-# Setup OpenClaw config from environment variables
 mkdir -p /root/.openclaw /root/clawd
 
-# Create OpenClaw config
 cat > /root/.openclaw/openclaw.json << CONF
 {
   "gateway": {
@@ -82,30 +80,31 @@ cat > /root/.openclaw/openclaw.json << CONF
       "enabled": true,
       "botToken": "${TELEGRAM_BOT_TOKEN}",
       "dmPolicy": "pairing",
-      "streaming": "partial"
+      "streaming": {
+        "mode": "partial"
+      }
     }
   }
 }
 CONF
 
-echo "OpenClaw config created"
+echo "OpenClaw config written."
 
-# Start OpenClaw gateway in background
-echo "Starting OpenClaw gateway..."
-openclaw gateway run &
-GATEWAY_PID=$!
-
-# Wait for gateway to be ready
-echo "Waiting for gateway to start..."
-for i in $(seq 1 60); do
-    if curl -s http://127.0.0.1:18789/ > /dev/null 2>&1; then
-        echo "Gateway is ready!"
-        break
+# Best-effort gateway start (don't block backend if it fails)
+if command -v openclaw >/dev/null 2>&1; then
+  echo "Starting OpenClaw gateway in background..."
+  (openclaw gateway run >/tmp/openclaw-gateway.log 2>&1 &) || echo "gateway launch failed (non-fatal)"
+  for i in $(seq 1 20); do
+    if curl -fs http://127.0.0.1:18789/ >/dev/null 2>&1; then
+      echo "Gateway ready."
+      break
     fi
-    sleep 2
-done
+    sleep 1
+  done
+else
+  echo "openclaw binary not found; skipping gateway."
+fi
 
-# Start the FastAPI backend
-echo "Starting backend..."
+echo "Starting FastAPI backend on port ${PORT:-8001}..."
 cd /app
 exec uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1
