@@ -1035,6 +1035,7 @@ async def websocket_proxy(websocket: WebSocket):
             ping_interval=20,
             ping_timeout=20,
             close_timeout=10,
+            max_size=None,
             additional_headers=extra_headers if extra_headers else None,
             origin=f"http://127.0.0.1:{MOLTBOT_PORT}"
         ) as moltbot_ws:
