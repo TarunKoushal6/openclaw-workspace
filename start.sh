@@ -5,6 +5,12 @@ echo "=== Starting OpenClaw Deployment ==="
 
 mkdir -p /root/.openclaw /root/clawd
 
+EMERGENT_API_BASE="${EMERGENT_BASE_URL:-https://api.freemodel.dev}"
+case "${EMERGENT_API_BASE%/}" in
+  */v1) ;;
+  *) EMERGENT_API_BASE="${EMERGENT_API_BASE%/}/v1" ;;
+esac
+
 cat > /root/.openclaw/openclaw.json << CONF
 {
   "gateway": {
@@ -24,7 +30,7 @@ cat > /root/.openclaw/openclaw.json << CONF
     "mode": "merge",
     "providers": {
       "emergent-gpt": {
-        "baseUrl": "${EMERGENT_BASE_URL:-https://api.freemodel.dev}/",
+        "baseUrl": "${EMERGENT_API_BASE%/}/",
         "apiKey": "${LLM_KEY}",
         "api": "openai-completions",
         "models": [
