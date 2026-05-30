@@ -617,6 +617,64 @@ def create_moltbot_config(token: str = None, api_key: str = None, provider: str 
             "primary": "anthropic/claude-opus-4-5-20251101"
         }
 
+
+    # Freemodel's OpenAI-compatible chat API lives under /v1.
+    # Force the runtime config back to the working model set even if an older
+    # persisted config still contains removed Claude/model IDs.
+    if provider == "emergent":
+        emergent_key = api_key or os.environ.get('LLM_KEY') or os.environ.get('EMERGENT_API_KEY', 'sk-emergent-1234')
+        emergent_base_url = os.environ.get('EMERGENT_BASE_URL', 'https://api.freemodel.dev').rstrip('/')
+        if not emergent_base_url.endswith('/v1'):
+            emergent_base_url = f"{emergent_base_url}/v1"
+
+        existing_config["models"]["providers"].pop("emergent-claude", None)
+        existing_config["models"]["providers"]["emergent-gpt"] = {
+            "baseUrl": f"{emergent_base_url}/",
+            "apiKey": emergent_key,
+            "api": "openai-completions",
+            "models": [
+                {
+                    "id": "gpt-5.5",
+                    "name": "GPT-5.5",
+                    "reasoning": True,
+                    "input": ["text"],
+                    "contextWindow": 400000,
+                    "maxTokens": 128000
+                },
+                {
+                    "id": "gpt-5.4",
+                    "name": "GPT-5.4",
+                    "reasoning": True,
+                    "input": ["text"],
+                    "contextWindow": 400000,
+                    "maxTokens": 128000
+                },
+                {
+                    "id": "gpt-5.4-mini",
+                    "name": "GPT-5.4 Mini",
+                    "input": ["text"],
+                    "contextWindow": 400000,
+                    "maxTokens": 128000
+                },
+                {
+                    "id": "gpt-5.3-codex",
+                    "name": "GPT-5.3 Codex",
+                    "input": ["text"],
+                    "contextWindow": 400000,
+                    "maxTokens": 128000
+                }
+            ]
+        }
+        existing_config["agents"]["defaults"]["models"] = {
+            "emergent-gpt/gpt-5.5": {"alias": "gpt-5.5"},
+            "emergent-gpt/gpt-5.4": {"alias": "gpt-5.4"},
+            "emergent-gpt/gpt-5.4-mini": {"alias": "mini"},
+            "emergent-gpt/gpt-5.3-codex": {"alias": "codex"}
+        }
+        existing_config["agents"]["defaults"]["model"] = {
+            "primary": "emergent-gpt/gpt-5.5"
+        }
+
     with open(CONFIG_FILE, "w") as f:
         json.dump(existing_config, f, indent=2)
 
