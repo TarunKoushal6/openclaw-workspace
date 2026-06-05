@@ -384,7 +384,7 @@ cat > /root/.openclaw/openclaw.json << CONF
     "defaults": {
       "workspace": "/root/clawd",
       "model": {
-        "primary": "bluesminds/gemini-3.1-pro"
+        "primary": "bluesminds/accounts/fireworks/models/deepseek-v4-pro"
       },
       "models": {
                 "bluesminds/minimax-m2": {
@@ -435,7 +435,7 @@ cat > /root/.openclaw/openclaw.json << CONF
                 "bluesminds/openai/gpt-oss-120b": {
                         "alias": "gpt-oss-120b"
                 },
-                "bluesminds/gemini-3.1-pro": {
+                "bluesminds/accounts/fireworks/models/deepseek-v4-pro": {
                         "alias": "gemini-3-1-pro"
                 },
                 "bluesminds/stepfun-ai/step-3.5-flash": {
@@ -456,7 +456,7 @@ cat > /root/.openclaw/openclaw.json << CONF
                 "bluesminds/gpt-4o": {
                         "alias": "gpt-4o"
                 },
-                "bluesminds/gemini-3.1-pro-preview": {
+                "bluesminds/accounts/fireworks/models/deepseek-v4-pro-preview": {
                         "alias": "gemini-3-1-pro-preview"
                 },
                 "bluesminds/qwen3.6-max-preview": {
